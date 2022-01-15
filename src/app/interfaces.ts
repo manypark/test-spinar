@@ -1,5 +1,6 @@
 export interface Tareas {
-    id:string;
+    id      :string;
     title   :string;
     desc    :string;
+    ref     :any;
 }
