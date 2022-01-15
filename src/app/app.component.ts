@@ -1,6 +1,9 @@
-import { Component } from '@angular/core';
+import { AfterContentInit, Component, ViewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { v4 as uuidv4 } from 'uuid';
+import { MatPaginator } from '@angular/material/paginator';
+import { MatSort } from '@angular/material/sort';
+import { MatTableDataSource } from '@angular/material/table';
 
 import { initializeApp } from 'firebase/app';
 import { getDatabase, onValue, ref, set } from "firebase/database";
@@ -13,11 +16,18 @@ import { environment } from 'src/environments/environment';
   styleUrls   : ['./app.component.css']
 })
 
-export class AppComponent {
+export class AppComponent implements AfterContentInit {
 
   title = 'test-spinar';
   tareas:Tareas[] = [];
   form:FormGroup;
+
+  displayedColumns: string[] = [ 'id', 'title', 'desc' ];
+  dataSource: MatTableDataSource<Tareas>;
+
+  @ViewChild(MatPaginator) paginator: MatPaginator;
+  @ViewChild(MatSort) sort: MatSort;
+  
   app = initializeApp(environment.firebaseConfig);
   database = getDatabase(this.app);
 
@@ -29,8 +39,25 @@ export class AppComponent {
       title : ['', [ Validators.required ]],
       desc  : ['', [ Validators.required ]]
     });
+  }
 
-    this.readTareas();
+  ngAfterContentInit(): void {
+    setTimeout(() => {
+      this.dataSource = new MatTableDataSource(this.tareas);
+      this.dataSource.paginator = this.paginator;
+      this.dataSource.sort = this.sort;
+
+      this.readTareas();
+    }, 100);
+  }
+
+  async applyFilter(event: Event) {
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.dataSource.filter = filterValue.trim().toLowerCase();
+
+    if (this.dataSource.paginator) {
+      this.dataSource.paginator.firstPage();
+    }
   }
 
   async readTareas() {
@@ -38,13 +65,14 @@ export class AppComponent {
 
     onValue(starCountRef, (snapshot) => {
 
-      this.tareas = [];
-      
+      this.tareas = [];      
+
       snapshot.forEach( t => {
-        console.log(t.val());
         this.tareas.push(t.val());
       });
-      
+
+      this.dataSource.data = [];
+      this.dataSource.data = this.tareas;
     });
   }
 
@@ -53,7 +81,7 @@ export class AppComponent {
     if(this.form.invalid) return;
 
     try {
-      set(ref(this.database, 'tareas/' + uuidv4()), this.form.value);
+      set(ref(this.database, 'tareas/' + uuidv4()), {id:uuidv4().split('-')[0], ...this.form.value});
       this.form.reset();
     } catch (e) {
       console.error("Error adding document: ", e);

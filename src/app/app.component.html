@@ -1,40 +1,75 @@
-<mat-grid-list cols="2">
 
-  <mat-grid-tile>
-    <mat-card>
-
-      <form [formGroup]="form">
-        <div class="inputs">
-          <mat-form-field appearance="outline">
-            <mat-label>Ingresa titulo</mat-label>
-            <input formControlName="title" matInput placeholder="Titulo...">
-            <mat-icon matSuffix>title</mat-icon>
-          </mat-form-field>
+<div class="forms">
+  <mat-card class="mat-elevation-z3">
+    <form [formGroup]="form">
+      <div class="inputs">
+        <mat-form-field appearance="outline">
+          <mat-label>Ingresa titulo</mat-label>
+          <input formControlName="title" matInput placeholder="Titulo...">
+          <mat-icon matSuffix>title</mat-icon>
+        </mat-form-field>
     
-          <mat-form-field appearance="outline">
-            <mat-label>Ingresa descripcion</mat-label>
-            <input formControlName="desc" matInput placeholder="Descripcion...">
-            <mat-icon matSuffix>description</mat-icon>
-          </mat-form-field>
-  
-          <button [disabled]="form.invalid" mat-raised-button color="primary" (click)="saveTarea()">Guardar</button>
-        </div>
-      </form>
+        <mat-form-field appearance="outline">
+          <mat-label>Ingresa descripcion</mat-label>
+          <input formControlName="desc" matInput placeholder="Descripcion...">
+          <mat-icon matSuffix>description</mat-icon>
+        </mat-form-field>
+    
+        <button [disabled]="form.invalid" mat-raised-button color="primary" (click)="saveTarea()">Guardar</button>
+      </div>
+    </form>
+  </mat-card>
+</div>
 
-    </mat-card>
-  </mat-grid-tile>
+<mat-form-field class="tableMargin" appearance="standard">
+  <mat-label>Filter</mat-label>
+  <input matInput (keyup)="applyFilter($event)" placeholder="Tarea..." #input>
+</mat-form-field>
 
-  <mat-grid-tile>
+<div class="mat-elevation-z2 tableMargin">
+  <table mat-table [dataSource]="dataSource" matSort>
 
-    <div class="inputs">
-      <mat-card style="margin-top: 20px;" *ngFor="let item of tareas">
-        <mat-label>
-            <h2> {{ item.title }} </h2>
-            <p> {{ item.desc }} </p>
-        </mat-label>
-      </mat-card>
-    </div>
+    <!-- ID Column -->
+    <ng-container matColumnDef="id">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header> Id </th>
+      <td mat-cell *matCellDef="let row"> {{row.id}} </td>
+    </ng-container>
 
-  </mat-grid-tile>
+    <!-- Title Column -->
+    <ng-container matColumnDef="title">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header> Title </th>
+      <td mat-cell *matCellDef="let row"> {{row.title}} </td>
+    </ng-container>
 
-</mat-grid-list>
+    <!-- Desc Column -->
+    <ng-container matColumnDef="desc">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header> Desc </th>
+      <td mat-cell *matCellDef="let row"> {{row.desc}} </td>
+    </ng-container>
+
+    <!-- Actions -->
+    <!-- <ng-container matColumnDef="actions">
+      <mat-icon aria-hidden="false" aria-label="Example home icon">
+        edit
+      </mat-icon>
+      <mat-icon aria-hidden="false" aria-label="Example home icon">
+        delete
+      </mat-icon>
+    </ng-container> -->
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+    <!-- Row shown when there is no matching data. -->
+    <tr class="mat-row" *matNoDataRow>
+      <td class="mat-cell" colspan="4">No data matching the filter</td>
+    </tr>
+  </table>
+
+  <mat-paginator 
+    [length]="tareas.length"
+    [pageSizeOptions]="[5, 10, 25, 100]" 
+    showFirstLastButtons 
+    aria-label="Select page of tareas">
+  </mat-paginator>
+</div>
