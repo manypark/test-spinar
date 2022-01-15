@@ -88,7 +88,6 @@ export class TableComponent {
     if (!row) {
       return `${this.isAllSelected() ? 'deselect' : 'select'} all`;
     }
-    
     return `${this.selection.isSelected(row) ? 'deselect' : 'select'} row ${ row.id + 1 }`;
   }
 
@@ -96,6 +95,8 @@ export class TableComponent {
     this.selection.selected.forEach( task => {
       remove( task.ref )
     });
+
+    this.selection.clear();
   }
 
 }
